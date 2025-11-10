@@ -1,12 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: boot003ser
+  name: argo-vue-ser
 spec:
   type: ClusterIP
   ports:
-  - port: 8001
-    targetPort: 7777
+  - port: 8000
+    targetPort: 80  
   selector:
-    app: boot003kube
-
+    app: vuedep

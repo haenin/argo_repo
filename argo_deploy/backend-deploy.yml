@@ -1,34 +1,35 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: boot003dep
+  name: argo-boot-dep
+  annotations:
+    argocd.argoproj.io/sync-wave: "3" 
 spec:
   selector:
     matchLabels:
-      app: boot003kube
+      app: bootdep
+  # replicas: 3
   replicas: 1
   template:
     metadata:
       labels:
-        app: boot003kube
+        app: bootdep
     spec:
       containers:
       - name: boot-container
-        image: haenin/jen_boot2:latest
+        image: haenin/argo_boot:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 7777
+        # MariaDB 연결을 위한 환경변수 설정
         env:
-        # Spring Boot는 application.yml에 이미 mariadb-persist를 호스트로 사용하도록 설정되어 있으므로
-        # Kubernetes에서는 서비스명(mariadb003ser)을 사용하도록 환경변수로 재정의합니다.
         - name: SPRING_DATASOURCE_URL
-          value: "jdbc:mariadb://mariadb003ser:3310/calcdb"
+          value: "jdbc:mariadb://argo-mariadb-ser:3310/calcdb"
         - name: SPRING_DATASOURCE_USERNAME
           value: "root"
         - name: SPRING_DATASOURCE_PASSWORD
           value: "root1234"
-
-        # 컨테이너가 트래픽을 받을 준비가 되었는지 확인
+        # Health Check - Spring Boot가 정상 실행되는지 확인
         readinessProbe:
           httpGet:
             path: /health
@@ -37,8 +38,6 @@ spec:
           periodSeconds: 10
           timeoutSeconds: 5
           failureThreshold: 3
-
-        # 컨테이너가 정상적으로 실행 중인지 확인
         livenessProbe:
           httpGet:
             path: /health
@@ -47,4 +46,3 @@ spec:
           periodSeconds: 15
           timeoutSeconds: 5
           failureThreshold: 3
-

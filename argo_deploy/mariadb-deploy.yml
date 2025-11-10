@@ -1,16 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mariadb003dep
+  name: argo-mariadb-dep
+  annotations:
+    # ArgoCD 전용 어노테이션 (선택 사항)
+    # sync-wave 없이도 동작하지만, PVC 생성 후 배포를 보장하기 위해 사용
+    argocd.argoproj.io/sync-wave: "2"  # 배포 순서: 2 (PVC 이후)
 spec:
   selector:
     matchLabels:
-      app: mariadb003kube
+      app: mariadbdep
   replicas: 1
   template:
     metadata:
       labels:
-        app: mariadb003kube
+        app: mariadbdep
     spec:
       containers:
       - name: mariadb-container
@@ -34,6 +38,7 @@ spec:
           mountPath: /var/lib/mysql
         - name: mariadb-logs
           mountPath: /var/log/mysql
+        # Health Check - DB가 완전히 준비되었는지 확인
         livenessProbe:
           exec:
             command:
